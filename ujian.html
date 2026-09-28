@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ujian Pendidikan Pancasila VII</title>
+<style>
+body{font:16px system-ui;background:#f2f6f3;color:#18251f;margin:0;padding:20px}
+.card{max-width:700px;margin:20px auto;background:white;padding:28px;border-radius:18px;box-shadow:0 5px 24px #0001}
+h1{color:#246b55}.muted{color:#66736c}
+.option{display:block;width:100%;text-align:left;background:white;border:1px solid #ccd8d1;border-radius:10px;padding:14px;margin:9px 0;font:inherit;cursor:pointer}
+.option.sel{background:#eaf5ef;border:2px solid #246b55}
+button.go{width:100%;padding:14px;background:#246b55;color:white;border:0;border-radius:10px;font-weight:bold;font-size:1rem;margin-top:18px;cursor:pointer}
+button:disabled{opacity:.4}
+input,select{width:100%;box-sizing:border-box;padding:13px;margin:7px 0 15px;border:1px solid #ccd8d1;border-radius:9px;font:inherit}
+#quiz,#result{display:none}
+.score{font-size:3rem;color:#246b55;font-weight:bold;text-align:center}
+.review{border-top:1px solid #ddd;padding:12px 0}
+#status{padding:12px;border-radius:9px;margin-top:12px;background:#eaf5ef}
+</style>
+</head>
+<body>
+<div class="card">
+
+<small>UJIAN • PENDIDIKAN PANCASILA • KELAS VII</small>
+<h1>Ujian Pendidikan Pancasila</h1>
+<p class="muted">Sejarah Kelahiran Pancasila dan Penerapan Nilai-Nilai Pancasila</p>
+
+<section id="intro">
+<h2>Identitas Peserta</h2>
+<label><b>Nama lengkap</b></label>
+<input id="nama" placeholder="Masukkan nama lengkap">
+
+<label><b>Kelas</b></label>
+<select id="kelas">
+<option value="">Pilih kelas</option>
+<option>VII A</option><option>VII B</option>
+<option>VII C</option><option>VII D</option>
+<option>VII E</option><option>VII F</option>
+<option>VII G</option><option>VII H</option>
+</select>
+
+<button class="go" id="start">Mulai Ujian →</button>
+</section>
+
+<section id="quiz">
+<b id="count"></b>
+<p id="timer" class="muted"></p>
+<p id="q"></p>
+<div id="opts"></div>
+<button class="go" id="next" disabled>Jawab & lanjutkan →</button>
+</section>
+
+<section id="result">
+<h2>Ujian selesai!</h2>
+<div class="score" id="score"></div>
+<p id="summary"></p>
+<p id="status">Mengirim hasil...</p>
+<button class="go" id="reviewBtn">Lihat pembahasan</button>
+<div id="review"></div>
+<button class="go" id="again">Kembali ke awal</button>
+</section>
+
+<iframe name="submitFrame" style="display:none"></iframe>
+</div>
+
+<script>
+const ENDPOINT="https://script.google.com/macros/s/AKfycbxaXA3w33WAs2mm6a83P4dbjLV8xkPo-aQ_IXyAaKn_hmqhUlqDfM3oRd4MANBswNGjfA/exec";
+
+const D=[
+["Tanggal 1 Juni 1945 diperingati sebagai hari lahir Pancasila karena Ir. Soekarno menyampaikan pidato tentang…",["Kemerdekaan Indonesia","Dasar negara Indonesia","Pembentukan BPUPK","Pembentukan PPKI"],1],
+["Ketua BPUPK adalah…",["Ir. Soekarno","Mohammad Hatta","Dr. Radjiman Wedyodiningrat","Mohammad Yamin"],2],
+["Sidang pertama BPUPK membahas…",["Rancangan undang-undang","Dasar negara Indonesia","Pembentukan kabinet","Pemilihan presiden"],1],
+["BPUPK dibentuk pada tanggal…",["1 Maret 1945","29 Mei 1945","17 Agustus 1945","18 Agustus 1945"],0],
+["Tokoh yang menyampaikan pidato dasar negara pada 1 Juni 1945 adalah…",["Mohammad Hatta","Mohammad Yamin","Ir. Soekarno","Radjiman Wedyodiningrat"],2],
+["Panitia Sembilan dibentuk untuk…",["Menyusun teks proklamasi","Merumuskan dasar negara","Membentuk tentara nasional","Memilih presiden dan wakil presiden"],1],
+["Hasil rumusan Panitia Sembilan pada 22 Juni 1945 disebut…",["Pembukaan UUD 1945","Piagam Jakarta","Proklamasi Kemerdekaan","Dekret Presiden"],1],
+["Sikap para tokoh saat merumuskan dasar negara adalah…",["Memaksakan pendapat","Mengutamakan kepentingan pribadi","Bermusyawarah mencapai kesepakatan","Menolak pendapat berbeda"],2],
+["Proklamasi Kemerdekaan Indonesia dilaksanakan pada…",["1 Juni 1945","22 Juni 1945","17 Agustus 1945","18 Agustus 1945"],2],
+["Pengetik naskah Proklamasi adalah…",["Sayuti Melik","Ahmad Soebardjo","Mohammad Hatta","Sukarni"],0],
+["Pancasila disahkan sebagai dasar negara oleh PPKI pada…",["1 Juni 1945","17 Agustus 1945","18 Agustus 1945","22 Juni 1945"],2],
+["Lambang sila pertama adalah…",["Rantai","Bintang","Pohon beringin","Kepala banteng"],1],
+["Lambang sila kedua adalah…",["Padi dan kapas","Rantai","Bintang","Pohon beringin"],1],
+["Lambang sila ketiga adalah…",["Kepala banteng","Padi dan kapas","Pohon beringin","Rantai"],2],
+["Lambang sila keempat adalah…",["Bintang","Pohon beringin","Kepala banteng","Padi dan kapas"],2],
+["Lambang sila kelima adalah…",["Rantai","Kepala banteng","Padi dan kapas","Bintang"],2],
+["Pancasila sebagai pandangan hidup bangsa berarti…",["Pedoman kehidupan sehari-hari","Aturan satu kelompok saja","Dasar kepentingan pribadi","Pedoman hanya di sekolah"],0],
+["Menghormati teman berbeda agama menerapkan sila…",["Kedua","Pertama","Ketiga","Keempat"],1],
+["Mengambil keputusan melalui musyawarah menerapkan sila…",["Pertama","Kedua","Keempat","Kelima"],2],
+["Bersikap adil memberikan hak kepada orang lain menerapkan sila…",["Pertama","Kedua","Ketiga","Kelima"],3]
+];
+
+let i=0,chosen=null,A=[],namaSiswa="",kelasSiswa="",mulai=0,interval=null;
+
+const $=id=>document.getElementById(id);
+
+function draw(){
+  let [q,o]=D[i];
+  $("count").textContent=`Soal ${i+1} dari ${D.length}`;
+  $("q").textContent=q;
+  $("opts").innerHTML="";
+  o.forEach((t,j)=>{
+    let b=document.createElement("button");
+    b.className="option";
+    b.textContent="ABCD"[j]+". "+t;
+    b.onclick=()=>{
+      chosen=j;
+      [...$("opts").children].forEach((e,k)=>e.classList.toggle("sel",k===j));
+      $("next").disabled=false;
+    };
+    $("opts").append(b);
+  });
+  $("next").disabled=true;
+  $("next").textContent=i===D.length-1?"Selesaikan Ujian":"Jawab & lanjutkan →";
+}
+
+$("start").onclick=()=>{
+  namaSiswa=$("nama").value.trim();
+  kelasSiswa=$("kelas").value;
+  if(!namaSiswa||!kelasSiswa){
+    alert("Isi nama dan pilih kelas terlebih dahulu.");
+    return;
+  }
+  $("intro").style.display="none";
+  $("quiz").style.display="block";
+  mulai=Date.now();
+  interval=setInterval(()=>{
+    let s=Math.floor((Date.now()-mulai)/1000);
+    $("timer").textContent="Waktu: "+Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+  },1000);
+  draw();
+};
+
+$("next").onclick=()=>{
+  A.push(chosen);
+  i++;
+  if(i===D.length)finish();
+  else draw();
+};
+
+function finish(){
+  clearInterval(interval);
+  let benar=A.filter((x,j)=>x===D[j][2]).length;
+  let nilai=benar*5;
+  let s=Math.floor((Date.now()-mulai)/1000);
+  let durasi=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+
+  $("quiz").style.display="none";
+  $("result").style.display="block";
+  $("score").textContent=nilai+"/100";
+  $("summary").textContent=`${namaSiswa} • ${kelasSiswa} • ${benar} benar dari 20 soal.`;
+
+  $("review").innerHTML=D.map(([q,o,a],j)=>
+    `<div class="review"><b>${j+1}. ${q}</b><p>Jawaban benar: ${"ABCD"[a]}. ${o[a]}</p></div>`
+  ).join("");
+  $("review").style.display="none";
+
+  const form=document.createElement("form");
+  form.method="POST";
+  form.action=ENDPOINT;
+  form.target="submitFrame";
+
+  const fields={
+    nama:namaSiswa,
+    kelas:kelasSiswa,
+    skor:nilai,
+    benar:benar,
+    total:D.length,
+    durasi:durasi,
+    kuis:"Ujian Pendidikan Pancasila Kelas VII"
+  };
+
+  Object.entries(fields).forEach(([key,value])=>{
+    const input=document.createElement("input");
+    input.type="hidden";
+    input.name=key;
+    input.value=value;
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+
+  $("status").textContent="Pengiriman hasil telah dilakukan. Guru dapat memeriksa Google Sheets.";
+}
+
+$("reviewBtn").onclick=()=>{
+  $("review").style.display=$("review").style.display==="none"?"block":"none";
+};
+
+$("again").onclick=()=>{
+  i=0;A=[];
+  $("result").style.display="none";
+  $("intro").style.display="block";
+  $("nama").value="";
+  $("kelas").value="";
+  scrollTo(0,0);
+};
+draw();
+</script>
+</body>
+</html>
